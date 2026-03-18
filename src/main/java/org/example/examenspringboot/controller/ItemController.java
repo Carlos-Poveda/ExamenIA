@@ -3,6 +3,7 @@ package org.example.examenspringboot.controller;
 import org.example.examenspringboot.exception.ItemNotFoundException;
 import org.example.examenspringboot.model.Item;
 import org.example.examenspringboot.persistency.ItemRepository;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,6 +40,22 @@ public class ItemController {
         return "item";
     }
 
+    // Mostrar formulario para añadir un nuevo item
+    @GetMapping("/new")
+    public String showAddItemForm(Model model) {
+        model.addAttribute("item", new Item());
+        model.addAttribute("pageTitle", "Añadir Nuevo Item");
+        model.addAttribute("action", "save");
+        return "item-form";
+    }
+
+    // Guardar un nuevo item
+    @PostMapping("/save")
+    public String saveItem(@ModelAttribute("item") Item item) {
+        itemRepository.save(item);
+        return "redirect:/items";
+    }
+
     // Mostrar formulario para editar un item
     @GetMapping("/edit/{id}")
     public String showEditItemForm(@PathVariable String id, Model model) {
@@ -46,12 +63,12 @@ public class ItemController {
                 .orElseThrow(() -> new ItemNotFoundException("No hay ningún item con el id: " + id));
         model.addAttribute("item", item);
         model.addAttribute("pageTitle", "Editar Item");
-        model.addAttribute("action", "/items/update/" + id);
+        model.addAttribute("action", "update/" + id);
         return "item-form";
     }
 
     // Actualizar un item existente
-    @PostMapping("/update/{id}")
+    @PostMapping("/items/update/{id}")
     public String updateItem(@PathVariable String id, @ModelAttribute("item") Item itemDetails) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("No hay ningún item con el id: " + id));
@@ -61,6 +78,7 @@ public class ItemController {
         item.setCategory(itemDetails.getCategory());
         item.setManufacturer(itemDetails.getManufacturer());
         item.setCount(itemDetails.getCount());
+
         itemRepository.save(item);
         return "redirect:/items";
     }
@@ -69,7 +87,7 @@ public class ItemController {
     @GetMapping("/delete/{id}")
     public String deleteItem(@PathVariable String id) {
         itemRepository.findById(id).ifPresent(itemRepository::delete);
-        return "redirect:/items";
+        return "redirect:/items/";
     }
 
     // Mostrar estadísticas

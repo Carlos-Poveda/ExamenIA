@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <h1>Lista de Items</h1>
-    <a href="/estadisticas" class="btn btn-secondary">Ver Estadísticas</a>
+    <a th:href="@{/estadisticas}" class="btn btn-secondary">Ver Estadísticas</a>
     <table>
         <thead>
         <tr>
@@ -29,7 +29,7 @@
             <td th:text="${item.count}"></td>
             <td>
                 <a th:href="@{/item/{id}(id=${item.id})}" class="btn btn-info">Detalles</a>
-                <a th:href="@{/update/{id}(id=${item.id})}" class="btn btn-warning">Editar</a>
+                <a th:href="@{/edit/{id}(id=${item.id})}" class="btn btn-warning">Editar</a>
                 <a th:href="@{/delete/{id}(id=${item.id})}" class="btn btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
             </td>
         </tr>
