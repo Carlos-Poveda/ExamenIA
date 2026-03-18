@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <title th:text="${pageTitle}"></title>
     <link rel="stylesheet" href="/css/styles.css">
+    <script>
+        async function generateDescription() {
+            const promptInput = document.getElementById('ai-prompt');
+            const descriptionArea = document.getElementById('description');
+            const generateBtn = document.getElementById('ai-btn');
+            const prompt = promptInput.value;
+
+            if (!prompt) {
+                alert('Por favor, escribe una instrucción para la IA.');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'Generando...';
+
+            try {
+                const response = await fetch(`/generate-description?prompt=${encodeURIComponent(prompt)}`);
+                if (response.ok) {
+                    const text = await response.text();
+                    descriptionArea.value = text;
+                } else {
+                    alert('Error al generar la descripción.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ocurrió un error al contactar con la IA.');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.textContent = 'Generar Descripción con IA';
+            }
+        }
+    </script>
 </head>
 <body>
 <div class="container">
@@ -13,9 +45,20 @@
             <label for="title">Título:</label>
             <input type="text" id="title" th:field="*{title}" required>
         </div>
+
+        <!-- Sección de IA -->
+        <div class="form-group" style="background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
+            <label for="ai-prompt">Asistente de IA (opcional):</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="ai-prompt" placeholder="Ej: Describe una silla ergonómica de oficina..." style="flex-grow: 1;">
+                <button type="button" id="ai-btn" onclick="generateDescription()" class="btn btn-info" style="margin: 0;">Generar Descripción con IA</button>
+            </div>
+        </div>
+
         <div class="form-group">
             <label for="description">Descripción:</label>
-            <input type="text" id="description" th:field="*{description}" required>
+            <!-- Cambiado a textarea para mejor visualización de textos largos -->
+            <textarea id="description" th:field="*{description}" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required></textarea>
         </div>
         <div class="form-group">
             <label for="category">Categoría:</label>

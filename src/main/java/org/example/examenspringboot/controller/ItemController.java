@@ -25,6 +25,13 @@ public class ItemController {
     public ItemController(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
+    // Generar descripción
+    @ResponseBody
+    @GetMapping("/generate-description")
+    public String generateDescription(@RequestParam String prompt) {
+        return chatModel.call(prompt);
+    }
+
     // Listar todos los items
     @GetMapping("/items")
     public String findAll(Model model) {
