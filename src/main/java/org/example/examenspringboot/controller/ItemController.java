@@ -16,13 +16,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/")
 public class ItemController {
 
+    @Autowired
+    private ChatModel chatModel;
+
     private final ItemRepository itemRepository;
 
     @Autowired
     public ItemController(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
-
     // Listar todos los items
     @GetMapping("/items")
     public String findAll(Model model) {
