@@ -98,7 +98,7 @@ public class ItemController {
     @GetMapping("/delete/{id}")
     public String deleteItem(@PathVariable String id) {
         itemRepository.findById(id).ifPresent(itemRepository::delete);
-        return "redirect:/items/";
+        return "redirect:/items";
     }
 
     // Mostrar estadísticas
