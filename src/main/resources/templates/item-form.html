@@ -12,7 +12,7 @@
             const prompt = promptInput.value;
 
             if (!prompt) {
-                alert('Por favor, escribe una instrucción para la IA.');
+                alert('Por favor, escribe una instrucción para que la IA genere la descripción.');
                 return;
             }
 
@@ -57,7 +57,6 @@
 
         <div class="form-group">
             <label for="description">Descripción:</label>
-            <!-- Cambiado a textarea para mejor visualización de textos largos -->
             <textarea id="description" th:field="*{description}" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" required></textarea>
         </div>
         <div class="form-group">
@@ -72,7 +71,7 @@
             <label for="count">Cantidad:</label>
             <input type="number" id="count" th:field="*{count}" required>
         </div>
-        <button type="submit" class="btn btn-primary">Guardar</button>
+        <button type="submit" class="btn btn-primary" onclick="return confirm('¿Estás seguro?')" >Guardar</button>
         <a th:href="@{/items}" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
