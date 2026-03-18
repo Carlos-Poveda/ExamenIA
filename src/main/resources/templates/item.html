@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Item</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Detalle del Item</h1>
+    <div>
+        <p><strong>ID:</strong> <span th:text="${item.id}"></span></p>
+        <p><strong>Título:</strong> <span th:text="${item.title}"></span></p>
+        <p><strong>Descripción:</strong> <span th:text="${item.description}"></span></p>
+        <p><strong>Categoría:</strong> <span th:text="${item.category}"></span></p>
+        <p><strong>Fabricante:</strong> <span th:text="${item.manufacturer}"></span></p>
+        <p><strong>Cantidad:</strong> <span th:text="${item.count}"></span></p>
+    </div>
+    <a href="/items" class="btn btn-secondary">Volver a la Lista</a>
+</div>
+</body>
+</html>

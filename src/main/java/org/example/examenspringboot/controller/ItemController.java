@@ -3,116 +3,91 @@ package org.example.examenspringboot.controller;
 import org.example.examenspringboot.exception.ItemNotFoundException;
 import org.example.examenspringboot.model.Item;
 import org.example.examenspringboot.persistency.ItemRepository;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/items")
-class ItemController {
+@Controller
+@RequestMapping("/")
+public class ItemController {
+
     private final ItemRepository itemRepository;
-    ItemController(ItemRepository itemRepository) {
+
+    @Autowired
+    public ItemController(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
 
-    // TODOS LOS ITEMS
-    @GetMapping("/all_items")
-    public List<Item> findAll() {
-        return itemRepository.findAll();
+    // Listar todos los items
+    @GetMapping("/items")
+    public String findAll(Model model) {
+        List<Item> items = itemRepository.findAll();
+        model.addAttribute("items", items);
+        return "items";
     }
-    // ADD ITEM
-    @PostMapping("/add_item")
-    public Item save(@RequestBody Item equipo) {
-        return itemRepository.save(equipo);
+
+    // Ver detalle de un item
+    @GetMapping("/item/{id}")
+    public String itemDetail(@PathVariable String id, Model model) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("No hay ningún item con el id: " + id));
+        model.addAttribute("item", item);
+        return "item";
     }
-    // DELETE ITEM POR ID
-    @DeleteMapping("/borrar_item_id/{id}")
-    public void delete(@PathVariable String id) {
-        Item item = itemRepository.findById(id).orElse(null);
-        if (item == null) {
-            throw new ItemNotFoundException("No hay ningún item con el id: "+id);
-        }
-        itemRepository.delete(item);
+
+    // Mostrar formulario para editar un item
+    @GetMapping("/edit/{id}")
+    public String showEditItemForm(@PathVariable String id, Model model) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("No hay ningún item con el id: " + id));
+        model.addAttribute("item", item);
+        model.addAttribute("pageTitle", "Editar Item");
+        model.addAttribute("action", "/items/update/" + id);
+        return "item-form";
     }
-    // DELETE ITEM POR NOMBRE
-    @DeleteMapping("/borrar_item_nombre")
-    public void deleteByName(@RequestParam String nombre) {
-        Item item = itemRepository.findFirstByTitle(nombre);
-        if (item == null) {
-            throw new ItemNotFoundException("No hay ningún item con el nombre: "+nombre);
-        }
-        itemRepository.delete(item);
+
+    // Actualizar un item existente
+    @PostMapping("/update/{id}")
+    public String updateItem(@PathVariable String id, @ModelAttribute("item") Item itemDetails) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("No hay ningún item con el id: " + id));
+
+        item.setTitle(itemDetails.getTitle());
+        item.setDescription(itemDetails.getDescription());
+        item.setCategory(itemDetails.getCategory());
+        item.setManufacturer(itemDetails.getManufacturer());
+        item.setCount(itemDetails.getCount());
+        itemRepository.save(item);
+        return "redirect:/items";
     }
-    // GET ITEM ID
-    @GetMapping("/item_id/{id}")
-    public Item findById(@PathVariable String id) {
-        Item item = itemRepository.findById(id).orElse(null);
-        if (item != null) {
-            return item;
-        } else {
-            throw new ItemNotFoundException("No hay ningún item con el id: "+id);
-        }
+
+    // Borrar un item
+    @GetMapping("/delete/{id}")
+    public String deleteItem(@PathVariable String id) {
+        itemRepository.findById(id).ifPresent(itemRepository::delete);
+        return "redirect:/items";
     }
-    // GET ITEM POR NOMBRE
-    @GetMapping("/item_nombre")
-    public Item findByNombre(@RequestParam String nombre) {
-        Item item = itemRepository.findFirstByTitle(nombre);
-        if (item != null) {
-            return item;
-        } else {
-            throw new ItemNotFoundException("No hay ningún item con el nombre: "+nombre);
-        }
-    }
-    // GET ALL ITEMS DE CATEGORIA
-    @GetMapping("/item_categoria")
-    public List<Item> findByCategoria(@RequestParam String categoria) {
-        List<Item> item = itemRepository.findItemsByCategory(categoria);
-        if (item != null) {
-            return item;
-        } else {
-            throw new ItemNotFoundException("No hay ningún item con la categoría: "+categoria);
-        }
-    }
-    // UPDATE ITEM CATEGORIA
-    @PutMapping("/actualizar_item_id/{id}")
-    public Item update(@PathVariable String id, @RequestBody Item item) {
-        Item itemExistente = itemRepository.findById(id).orElse(null);
-        if (itemExistente != null) {
-            itemExistente.setCategory(item.getCategory());
-            return itemRepository.save(itemExistente);
-        } else {
-            throw new ItemNotFoundException("No hay ningún item con el id: "+id);
-        }
-    }
-    // GET ESTADÍSTICAS
+
+    // Mostrar estadísticas
     @GetMapping("/estadisticas")
-    public ResponseEntity<String> getEstadisticas() {
-        List<Item> lista = itemRepository.findAll();
-
+    public String getEstadisticas(Model model) {
         long numItems = itemRepository.count();
-
         int constante = 100;
-
         List<Item> menorQueConstante = itemRepository.findItemsByCountLessThan(constante);
-        List<String> nombresMenorQueConstante = new ArrayList<>();
 
-        for (Item item: menorQueConstante) {
-            nombresMenorQueConstante.add(item.getTitle());
-        }
+        List<String> fabricantes = itemRepository.findAll().stream()
+                .map(Item::getManufacturer)
+                .distinct()
+                .collect(Collectors.toList());
 
+        model.addAttribute("numItems", numItems);
+        model.addAttribute("itemsBajoStock", menorQueConstante);
+        model.addAttribute("fabricantes", fabricantes);
 
-        List<String> fabricantes = new ArrayList<>();
-        for (Item item : lista) {
-            if (!fabricantes.contains(item.getManufacturer())) {
-                fabricantes.add(item.getManufacturer());
-            }
-        }
-
-        return ResponseEntity.ok("Número de items: " + numItems + "\n" + "Items con un stock menor a 100: " + nombresMenorQueConstante + "\n" + "Lista de fabricantes: " + fabricantes.toString());
+        return "estadisticas";
     }
-
-
 }
-

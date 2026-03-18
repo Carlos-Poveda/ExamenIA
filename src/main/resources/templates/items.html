@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Items</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Lista de Items</h1>
+    <a href="/estadisticas" class="btn btn-secondary">Ver Estadísticas</a>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Categoría</th>
+            <th>Fabricante</th>
+            <th>Cantidad</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.id}"></td>
+            <td th:text="${item.title}"></td>
+            <td th:text="${item.category}"></td>
+            <td th:text="${item.manufacturer}"></td>
+            <td th:text="${item.count}"></td>
+            <td>
+                <a th:href="@{/item/{id}(id=${item.id})}" class="btn btn-info">Detalles</a>
+                <a th:href="@{/update/{id}(id=${item.id})}" class="btn btn-warning">Editar</a>
+                <a th:href="@{/delete/{id}(id=${item.id})}" class="btn btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
